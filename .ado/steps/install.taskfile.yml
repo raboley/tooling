@@ -1,0 +1,69 @@
+parameters:
+  - name: version
+    type: string
+    default: 'latest'
+    displayName: 'Taskfile version to install'
+  - name: installPath
+    type: string
+    default: './bin'
+    displayName: 'Installation path'
+
+steps:
+  - task: Bash@3
+    displayName: 'Install Taskfile'
+    inputs:
+      targetType: 'inline'
+      script: |
+        set -e
+        
+        # Determine platform
+        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+        ARCH=$(uname -m)
+        
+        # Convert architecture to Taskfile naming convention
+        case $ARCH in
+          x86_64)
+            ARCH="amd64"
+            ;;
+          aarch64|arm64)
+            ARCH="arm64"
+            ;;
+          *)
+            echo "Unsupported architecture: $ARCH"
+            exit 1
+            ;;
+        esac
+        
+        # Set version
+        VERSION="${{ parameters.version }}"
+        if [ "$VERSION" = "latest" ]; then
+          VERSION=$(curl -s https://api.github.com/repos/go-task/task/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        fi
+        
+        # Download URL
+        DOWNLOAD_URL="https://github.com/go-task/task/releases/download/${VERSION}/task_${OS}_${ARCH}.tar.gz"
+        
+        echo "Downloading Taskfile ${VERSION} for ${OS}/${ARCH}..."
+        
+        # Create temporary directory
+        TEMP_DIR=$(mktemp -d)
+        cd "$TEMP_DIR"
+        
+        # Download and extract
+        curl -L "$DOWNLOAD_URL" -o task.tar.gz
+        tar -xzf task.tar.gz
+        
+        # Install
+        INSTALL_PATH="${{ parameters.installPath }}"
+        mkdir -p "$INSTALL_PATH"
+        mv task "$INSTALL_PATH/task"
+        chmod +x "$INSTALL_PATH/task"
+        
+        # Cleanup
+        cd /
+        rm -rf "$TEMP_DIR"
+        
+        # Verify installation
+        task --version
+        
+        echo "Taskfile installed successfully to $INSTALL_PATH/task"
