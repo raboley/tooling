@@ -16,6 +16,7 @@ steps:
       script: |
         set -e
         
+        echo "This is stable branch 0.0.1"
         # Determine platform
         OS=$(uname -s | tr '[:upper:]' '[:lower:]')
         ARCH=$(uname -m)
