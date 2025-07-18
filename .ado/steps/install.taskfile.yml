@@ -16,6 +16,7 @@ steps:
       script: |
         set -e
         
+        echo "This is stable branch 0.0.1"
         # Determine platform
         OS=$(uname -s | tr '[:upper:]' '[:lower:]')
         ARCH=$(uname -m)
@@ -63,7 +64,7 @@ steps:
         cd /
         rm -rf "$TEMP_DIR"
         
-        # Verify installation
-        task --version
+        # Add to PATH for subsequent steps
+        echo "##vso[task.prependpath]$(pwd)/$INSTALL_PATH"
         
         echo "Taskfile installed successfully to $INSTALL_PATH/task"
