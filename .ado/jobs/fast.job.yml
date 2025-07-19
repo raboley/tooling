@@ -4,7 +4,7 @@ parameters:
     default: DelayJob
 
 jobs:
-  - job: ${{ parameters.name}}
+  - job: ${{ parameters.name}}_stable
     pool: server
     steps:
       - task: Delay@1
