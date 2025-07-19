@@ -1,0 +1,12 @@
+parameters:
+  - name: name
+    type: string
+    default: DelayJob
+
+jobs:
+  - job: ${{ parameters.name}}
+    pool: server
+    steps:
+      - task: Delay@1
+        inputs:
+          delayForMinutes: '0'
